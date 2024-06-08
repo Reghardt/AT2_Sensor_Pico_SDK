@@ -5,22 +5,17 @@
 #include "hardware/i2c.h"
 #include "hardware/watchdog.h"
 #include "LoRa.h"
+#include "NewPing.h"
 
 #define GPIO_ON 1
 #define GPIO_OFF 0
 
-// SPI Defines
-// #define READ_BIT 0x80
-// #define SPI_PORT spi1
-// #define SPI_RX_PIN 12
-// #define SPI_TX_PIN 15
-// #define SPI_SCK_PIN 14
-
-// #define LORA_CS_PIN 13
-// #define LORA_RST_PIN 11
-// #define LORA_DIO0_PIN 10
+#define TRIGGER_PIN 17
+#define ECHO_PIN 16
+#define MAX_DISTANCE 450
 
 LoRaClass loraClass = LoRaClass();
+NewPing sonar = NewPing(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 
 int main()
 {
@@ -33,6 +28,8 @@ int main()
     }
     watchdog_enable(3000, 1);
     watchdog_update();
+
+    sonar.begin();
 
     loraClass.begin(868E6);
     loraClass.setTxPower(13);
@@ -53,6 +50,8 @@ int main()
         gpio_put(PICO_DEFAULT_LED_PIN, GPIO_ON);
         sleep_ms(500);
         gpio_put(PICO_DEFAULT_LED_PIN, GPIO_OFF);
+        uint16_t reading = sonar.ping_cm();
+        printf("Reading: %u\n", reading);
         sleep_ms(500);
 
         loraClass.beginPacket();

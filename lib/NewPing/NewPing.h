@@ -1,6 +1,9 @@
 #pragma once
 #define NewPing_h
 
+#include <stdio.h>
+#include "pico/stdlib.h"
+
 // Shouldn't need to change these values unless you have a specific need to do so.
 #define MAX_SENSOR_DISTANCE 500 // Maximum sensor distance can be as high as 500cm, no reason to wait for ping longer than sound takes to travel this distance and back. Default=500
 #define US_ROUNDTRIP_CM 57		// Microseconds (uS) it takes sound to travel round-trip 1cm (2cm total), uses integer to save compiled code space. Default=57
@@ -27,6 +30,7 @@ class NewPing
 {
 public:
 	NewPing(uint8_t trigger_pin, uint8_t echo_pin, unsigned int max_cm_distance = MAX_SENSOR_DISTANCE);
+	void begin();
 	unsigned int ping(unsigned int max_cm_distance = 0);
 	unsigned long ping_cm(unsigned int max_cm_distance = 0);
 	unsigned long ping_in(unsigned int max_cm_distance = 0);
@@ -43,5 +47,7 @@ protected:
 
 	unsigned int _maxEchoTime;
 	unsigned long _max_time;
-	bool _one_pin_mode;
+
+private:
+	uint32_t micros();
 };

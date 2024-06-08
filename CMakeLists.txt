@@ -39,7 +39,10 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(pico_sdk_sensor pico_sdk_sensor.cpp LoRa.cpp )
+add_subdirectory(lib/LoRa)
+add_subdirectory(lib/NewPing)
+add_executable(pico_sdk_sensor pico_sdk_sensor.cpp )
+
 
 pico_set_program_name(pico_sdk_sensor "pico_sdk_sensor")
 pico_set_program_version(pico_sdk_sensor "0.1")
@@ -60,6 +63,8 @@ target_include_directories(pico_sdk_sensor PRIVATE
 
 # Add any user requested libraries
 target_link_libraries(pico_sdk_sensor 
+        LoRa
+        NewPing
         hardware_spi
         hardware_i2c
         hardware_watchdog
