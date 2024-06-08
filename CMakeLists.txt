@@ -41,6 +41,7 @@ pico_sdk_init()
 
 add_subdirectory(lib/LoRa)
 add_subdirectory(lib/NewPing)
+add_subdirectory(lib/Adafruit_BusIO)
 add_executable(pico_sdk_sensor pico_sdk_sensor.cpp )
 
 
@@ -63,11 +64,12 @@ target_include_directories(pico_sdk_sensor PRIVATE
 
 # Add any user requested libraries
 target_link_libraries(pico_sdk_sensor 
-        LoRa
-        NewPing
         hardware_spi
         hardware_i2c
         hardware_watchdog
+        LoRa
+        NewPing
+        Adafruit_BusIO
         )
 
 pico_add_extra_outputs(pico_sdk_sensor)
