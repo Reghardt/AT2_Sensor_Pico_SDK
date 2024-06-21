@@ -1,0 +1,3 @@
+[submodule "lib/Pi-Pico-SDK-LoRa"]
+	path = lib/Pi-Pico-SDK-LoRa
+	url = https://github.com/Reghardt/Pi-Pico-SDK-LoRa.git

@@ -42,5 +42,8 @@
     "GPIO",
     "PICO",
     "Rssi"
-  ]
+  ],
+  "files.associations": {
+    "*.tcc": "cpp"
+  }
 }

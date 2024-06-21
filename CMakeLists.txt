@@ -39,9 +39,8 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_subdirectory(lib/LoRa)
+add_subdirectory(lib/Pi-Pico-SDK-LoRa)
 add_subdirectory(lib/NewPing)
-add_subdirectory(lib/Adafruit_BusIO)
 add_executable(pico_sdk_sensor pico_sdk_sensor.cpp )
 
 
@@ -69,7 +68,6 @@ target_link_libraries(pico_sdk_sensor
         hardware_watchdog
         LoRa
         NewPing
-        Adafruit_BusIO
         )
 
 pico_add_extra_outputs(pico_sdk_sensor)
