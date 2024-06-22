@@ -105,7 +105,7 @@ bool NewPing::ping_trigger()
 {
 
 	gpio_put(_triggerPin, 1); // Set trigger pin high, this tells the sensor to send out a ping.
-	sleep_ms(TRIGGER_WIDTH);  // Wait long enough for the sensor to realize the trigger pin is high.
+	sleep_us(TRIGGER_WIDTH);  // Wait long enough for the sensor to realize the trigger pin is high.
 	gpio_put(_triggerPin, 0); // Set trigger pin back to low.
 
 	if (gpio_get(_echoPin))

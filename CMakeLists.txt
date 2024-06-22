@@ -6,6 +6,9 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# recomended from json library
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+
 # Initialise pico_sdk from installed location
 # (note this can come from environment, CMake cache etc)
 
@@ -41,6 +44,7 @@ pico_sdk_init()
 
 add_subdirectory(lib/Pi-Pico-SDK-LoRa)
 add_subdirectory(lib/NewPing)
+add_subdirectory(lib/json)
 add_executable(pico_sdk_sensor pico_sdk_sensor.cpp )
 
 
@@ -68,6 +72,7 @@ target_link_libraries(pico_sdk_sensor
         hardware_watchdog
         LoRa
         NewPing
+        nlohmann_json
         )
 
 pico_add_extra_outputs(pico_sdk_sensor)
