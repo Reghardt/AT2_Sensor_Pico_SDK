@@ -44,6 +44,7 @@
     "Rssi"
   ],
   "files.associations": {
-    "*.tcc": "cpp"
+    "*.tcc": "cpp",
+    "cmath": "cpp"
   }
 }

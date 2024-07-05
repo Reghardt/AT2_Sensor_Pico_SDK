@@ -22,6 +22,38 @@ using json = nlohmann::json;
 #define LORA_RST_PIN 11
 #define LORA_DIO0_PIN 10
 
+class FixedSizeVector
+{
+private:
+    std::vector<double> data;
+    size_t maxSize;
+    size_t currentIndex;
+    bool isFull;
+
+public:
+    FixedSizeVector(size_t size) : maxSize(size), currentIndex(0), isFull(false)
+    {
+        data.resize(size);
+    }
+
+    void add(double value)
+    {
+        data[currentIndex] = value;
+        currentIndex = (currentIndex + 1) % maxSize;
+        if (currentIndex == 0)
+        {
+            isFull = true;
+        }
+    }
+
+    double average() const
+    {
+        size_t count = isFull ? maxSize : currentIndex;
+        double sum = std::accumulate(data.begin(), data.begin() + count, 0.0);
+        return count == 0 ? 0 : sum / count;
+    }
+};
+
 LoRa loRa = LoRa(spi1, LORA_CS_PIN, LORA_RST_PIN, LORA_DIO0_PIN);
 NewPing sonar = NewPing(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 
@@ -39,93 +71,80 @@ int main()
 
     sonar.begin();
 
-    // loRa.begin(868E6);
-    // loRa.setTxPower(13);
-    // loRa.setSignalBandwidth(62.5E3);
-    // loRa.setCodingRate4(5);
-    // loRa.setSpreadingFactor(7);
-    // loRa.setGain(6);
-    // loRa.enableCrc();
+    loRa.begin(868E6);
+    loRa.setTxPower(13);
+    loRa.setSignalBandwidth(62.5E3);
+    loRa.setCodingRate4(5);
+    loRa.setSpreadingFactor(7);
+    loRa.setGain(6);
+    loRa.enableCrc();
 
     gpio_set_function(PICO_DEFAULT_LED_PIN, GPIO_FUNC_SIO);
     gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
     gpio_put(PICO_DEFAULT_LED_PIN, GPIO_OFF);
 
     json j;
-    j["tstVal"] = 1;
+    j["tv"] = 1;
 
-    uint32_t timestamp = time_us_32();
-    bool flipflop = true;
-    uint16_t reading = 0;
+    // FixedSizeVector vec(5);
+
+    // vec.add(sonar.ping_cm());
+    // sleep_ms(200);
+    // vec.add(sonar.ping_cm());
+    // sleep_ms(200);
+    // vec.add(sonar.ping_cm());
+    // sleep_ms(200);
+    // vec.add(sonar.ping_cm());
+    // sleep_ms(200);
+    // vec.add(sonar.ping_cm());
+    // sleep_ms(200);
+
     while (true)
     {
-        // const uint32_t now = time_us_32();
-        // if (now - timestamp >= 1000 * 1000)
-        // {
-        //     watchdog_update();
-        //     if (flipflop)
-        //     {
-        //         reading = sonar.ping_cm();
 
-        //         printf("Reading: %u\n", reading);
-        //         flipflop = !flipflop;
-        //     }
-        //     else
-        //     {
-        //         // auto mspk = json::to_msgpack(j);
-        //         // loRa.beginPacket();
-        //         // for (const uint8_t &c : mspk)
-        //         // {
-        //         //     loRa.print(c);
-        //         // }
-        //         // loRa.endPacket();
-        //         j["tstVal"] = (int)j["tstVal"] + 1;
-        //         flipflop = !flipflop;
-        //     }
+        gpio_put(PICO_DEFAULT_LED_PIN, GPIO_ON);
+        sleep_ms(250);
+        gpio_put(PICO_DEFAULT_LED_PIN, GPIO_OFF);
+        uint16_t reading = sonar.ping_cm();
+        // vec.add(sonar.ping_cm());
+        printf("Reading: %u\n", reading);
 
-        //     timestamp = now;
-        // }
+        sleep_ms(250);
 
-        // printf("Hello, world 7!\n");
+        j["r"] = reading;
 
-        // gpio_put(PICO_DEFAULT_LED_PIN, GPIO_ON);
-        // sleep_ms(500);
-        // gpio_put(PICO_DEFAULT_LED_PIN, GPIO_OFF);
-        // uint16_t reading = sonar.ping_cm();
-        // printf("Reading: %u\n", reading);
-        // sleep_ms(500);
+        auto mspk = json::to_msgpack(j);
 
-        // auto mspk = json::to_msgpack(j);
+        loRa.beginPacket();
+        for (const uint8_t &c : mspk)
+        {
+            loRa.print(c);
+        }
+        loRa.endPacket();
 
-        // loRa.beginPacket();
-        // for (const uint8_t &c : mspk)
-        // {
-        //     loRa.print(c);
-        // }
-        // loRa.endPacket();
-
-        // j["tstVal"] = (int)j["tstVal"] + 1;
+        j["tv"] = (int)j["tv"] + 1;
 
         watchdog_update();
-        sleep_ms(200);
-        gpio_put(TRIGGER_PIN, 1); // Set trigger pin high, this tells the sensor to send out a ping.
-        sleep_us(TRIGGER_WIDTH);  // Wait long enough for the sensor to realize the trigger pin is high.
-        gpio_put(TRIGGER_PIN, 0); // Set trigger pin back to low.
-
-        while (gpio_get(ECHO_PIN) == false)
-        {
-        }
-        uint32_t start = time_us_32();
-
-        while (gpio_get(ECHO_PIN) == true)
-        {
-        }
-        uint32_t end = time_us_32();
-        printf("start: %uus\n", start);
-        printf("end: %uus\n", end);
-        auto diff = (uint32_t)(end - start);
-        printf("diff: %uus\n", diff);
-        auto seconds = (float_t)diff / (float_t)1000 / (float_t)1000;
-        printf("Dist: %fcm\n", (seconds * 346) / (float_t)2);
     }
 }
+
+// sleep_ms(200);
+// gpio_put(TRIGGER_PIN, 1); // Set trigger pin high, this tells the sensor to send out a ping.
+// sleep_us(TRIGGER_WIDTH);  // Wait long enough for the sensor to realize the trigger pin is high.
+// gpio_put(TRIGGER_PIN, 0); // Set trigger pin back to low.
+
+// while (gpio_get(ECHO_PIN) == false)
+// {
+// }
+// uint32_t start = time_us_32();
+
+// while (gpio_get(ECHO_PIN) == true)
+// {
+// }
+// uint32_t end = time_us_32();
+// printf("start: %uus\n", start);
+// printf("end: %uus\n", end);
+// auto diff = (uint32_t)(end - start);
+// printf("diff: %uus\n", diff);
+// auto seconds = (float_t)diff / (float_t)1000 / (float_t)1000;
+// printf("Dist: %fcm\n", (seconds * 346) / (float_t)2);
